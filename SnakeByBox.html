@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>张明专用贪吃蛇   V1.0</title>
+		<style>
+			*{ margin:  0 ; padding:  0 ; border:  none; }
+			#clear{display:block;font-size: 40px; position: absolute; right: 40px;top:70px;}
+			#x{display:block;font-size: 50px; position: absolute;top: 500px;}
+			#restart{display:block;font-size: 40px; position: absolute; right: 25px;top: 20px;}
+			#levelP{display:block;font-size: 40px; position: absolute; left: 500px;top: 500px;}
+			#levelJ{display:block;font-size: 40px; position: absolute; left: 700px;top: 500px;}
+			#deadline{display:block;font-size: 40px; position: absolute; left: 1000px;top: 500px;}
+			#plm{ display:block;font-size: 20px; position: absolute;top: 550px;left:100px;}
+		</style>
+	</head>
+	<body onload="bj();addfood();" id="bodd">
+		<input type="button" value="restart" id="restart"/>
+		<input type="button" value="Clear" id="clear"/>
+		<span id="x">Score:0  cycle:200</span>
+		<input type="button" value="加速" id="levelP"/>
+		<input type="button" value="减速" id="levelJ"/>
+		<input type="button" value="死亡模式！！" id="deadline"/>
+		<span id="plm">WASD控制   键盘控制直接开始  长按一个方向加速</span
+	</body>
+	<script>
+		//"use strict";
+		var My=200;    //起始点
+		var Mx=200;
+		var pen_height="10px";
+		var pen_width="10px";
+		var Pen_chg=10;
+		var plo;   //  0 1 2 3    w a s d
+		var keyco=99;
+		var count=0;   //步数
+		var zdcd=10;   //长度scope
+		var pos_snake_X= new Array(zdcd);  //存储蛇的长度
+		var pos_snake_Y= new Array(zdcd);
+		var Snake_head_X;
+		var Snake_head_Y;
+		var Food_X;
+		var Food_Y;
+		var sp=document.getElementById("x");
+		var tiii=0;
+		var score=0;
+		var level=200;
+		var xh=undefined;
+		for (var i=0;i<pos_snake_X.length;i++) {
+			pos_snake_X[i]=0;
+			pos_snake_Y[i]=0;
+		}
+		document.onkeypress = function(e)
+		{
+			//  是否可以回头   可回头注释
+			if ( (e.keyCode==119 && keyco == 115) ||(e.keyCode==115 && keyco == 119) ||(e.keyCode==97 && keyco == 100) ||(e.keyCode==100 && keyco == 97 ) ) 
+			{
+				return 0;
+			}
+			keyco=e.keyCode;
+			clearTimeout(xh);
+				switch (e.keyCode)
+				{
+					case 119 :plo=0 ; auto();	break; //w   119  87
+					case 97  :plo=1 ; auto();	break; //a   97   65
+					case 115 :plo=2 ; auto();	break; //s   115  83
+					case 100 :plo=3 ; auto(); 	break; //d   100  68
+					default:alert("errors :  keycode:"+e.keyCode+" not the specified button");
+				};
+		}
+		function auto(x)
+		{	
+			move();
+			eat();
+			xh = setTimeout("auto()",level);		 //循环
+			/*长度*/
+			if (count>=zdcd)
+			{
+				remov(count-zdcd);
+			}
+			/*死亡判断*/
+			var isd=isdead() ;
+			if (isd == 0)
+			{
+				clearTimeout(xh);
+			}
+		}
+
+		function move()
+		{
+			switch (plo)
+			{
+				case 0 : My-=Pen_chg;break;	
+				case 1 : Mx-=Pen_chg;break;	
+				case 2 : My+=Pen_chg;break;	
+				case 3 : Mx+=Pen_chg;break;
+				default : alert("errors : plo");
+			}
+			add();
+		}
+	
+		function isdead()
+		{
+			//碰到自己dead
+//			for (var i=0;i<pos_snake_X.length-1;i--)
+//			{
+//				if (pos_snake_X[i] == Snake_head_X && pos_snake_Y[i]==Snake_head_Y) 
+//				{
+//					return 0;
+//				} 
+//			}
+			var bj=document.getElementById("bj");
+			if (My<10) 	{ bj.style.border="10px solid red" ;alert("you lose")  ;return 0;}
+			if (My>400) { bj.style.border="10px solid red" ;alert("you lose")  ;return 0;}
+			if (Mx<10) 	{ bj.style.border="10px solid red" ;alert("you lose")  ;return 0;}
+			if (Mx>1200){ bj.style.border="10px solid red" ;alert("you lose")  ;return 0;}
+			else
+			{
+				return 1;
+			}
+		}
+				
+		function eat()
+		{
+			if (Snake_head_X==Food_X && Snake_head_Y==Food_Y) 
+			{
+				zdcd+=5;
+				var a=document.getElementById("food");
+				a.parentNode.removeChild(a);
+				addfood();
+				score++;
+				sp.innerHTML="Score:"+score+"  cycle:"+level+"";
+				pos_snake_X.length++;
+				pos_snake_Y.length++;
+			}
+		}
+		
+		var b=document.getElementById("deadline");
+		b.onclick=function()
+		{
+			level=10;
+			sp.innerHTML="Score:"+score+"  cycle:"+level+"";
+			var bod=document.getElementById("bodd");
+			bod.style.backgroundColor="#cc0000";
+			var Odiv =document.getElementById("bj");
+			Odiv.style.backgroundColor="cc0000";
+		}
+		
+		var m=document.getElementById("levelP");
+		m.onclick=function()
+		{
+			level-=10;
+			sp.innerHTML="Score:"+score+"  cycle:"+level+"";
+
+		}
+		var n=document.getElementById("levelJ");
+		n.onclick=function()
+		{
+			level+=10;
+			sp.innerHTML="Score:"+score+"  cycle:"+level+"";
+
+		}
+		var x=document.getElementById("clear");
+	    x.onclick= function clear()
+		{
+			var odiv=document.getElementsByClassName("SnakeDiv");
+			for (var i=odiv.length;i>0;i--) {
+				odiv[0].parentNode.removeChild(odiv[0]);
+			}
+
+		}
+		var res=document.getElementById("restart");
+		res.onclick= function()
+		{
+			window.location.reload();
+		}
+
+		
+		function bj()
+		{
+			var Odiv =document.createElement('div');
+			Odiv.style.cssText=" border: 10px solid deepskyblue ; position: fixed;"
+			Odiv.style.height="400px";
+			Odiv.style.width= "1200px";
+			Odiv.id="bj"
+			document.body.appendChild(Odiv);
+			
+		}
+		
+		function remov(x)
+		{
+			var odiv=document.getElementById("Snake"+x+"");
+			try
+			{
+				odiv.parentNode.removeChild(odiv);
+			}catch(e){
+				//TODO handle the exception
+			}
+		}
+		
+		
+		function add()
+		{
+			var Odiv =document.createElement('div');
+			Odiv.style.cssText="background-color:#000; position: fixed; z-index: 1000;"
+			Odiv.style.height= pen_height;
+			Odiv.style.width= pen_width;
+			Odiv.style.top=My+"px";
+			Odiv.style.left=Mx+"px";
+			Odiv.className="SnakeDiv"
+			Odiv.id="Snake"+count+""
+			document.body.appendChild(Odiv);
+			Snake_head_X=Odiv.style.left;
+			Snake_head_Y=Odiv.style.top;
+			count++;
+			pos_snake_X.shift();
+			pos_snake_X.push(Snake_head_X);
+			pos_snake_Y.shift();
+			pos_snake_Y.push(Snake_head_Y);
+			console.log(pos_snake_X);
+			console.log(pos_snake_Y);
+		}
+		
+		function addfood()
+		{	
+			var x=parseInt( Math.random()*39.1+1)*10;
+			var y=parseInt( Math.random()*119.1+1)*10;
+			var Odiv =document.createElement('div');
+			Odiv.style.cssText="background-color: red; position: fixed; z-index: 1001;"
+			Odiv.style.height= pen_height;
+			Odiv.style.width= pen_width;
+			Odiv.style.top=x+"px";
+			Odiv.style.left=y+"px";
+			Odiv.style.display="block";
+			Odiv.id="food";
+			document.body.appendChild(Odiv);
+			Food_X=Odiv.style.left;
+			Food_Y=Odiv.style.top;
+		}
+	</script>
+</html>
